@@ -1,3 +1,5 @@
+
+//Этот тип описывает в каком формате придет ответ
 export type ApiListResponse<Type> = {
     total: number,
     items: Type[]

@@ -4,10 +4,15 @@ import {dayjs, formatNumber} from "../utils/utils";
 import {Model} from "./base/Model";
 import {FormErrors, IAppState, IBasketItem, ILot, IOrder, IOrderForm, LotStatus} from "../types";
 
+
+//Мы принимает от АПИ массив
 export type CatalogChangeEvent = {
     catalog: LotItem[]
 };
 
+
+
+//Класс хранящий инфорацию о фильме
 export class LotItem extends Model<ILot> {
     about: string;
     description: string;
@@ -114,13 +119,19 @@ export class AppState extends Model<IAppState> {
         return this.order.items.reduce((a, c) => a + this.catalog.find(it => it.id === c).price, 0)
     }
 
+    //Принимаем от АПИ ответ ввиде массива  под свой проейт нужно переписать тип ILOT
     setCatalog(items: ILot[]) {
+        // console.log(items)
         this.catalog = items.map(item => new LotItem(item, this.events));
         this.emitChanges('items:changed', { catalog: this.catalog });
     }
 
+
+    //Показать превью
     setPreview(item: LotItem) {
+        // console.log(item)
         this.preview = item.id;
+        // вызываем событие превью и передаем туда карточку ввиде объекта
         this.emitChanges('preview:changed', item);
     }
 

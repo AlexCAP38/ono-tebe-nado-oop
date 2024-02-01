@@ -51,6 +51,7 @@ export function ensureAllElements<T extends HTMLElement>(selectorElement: Select
 export type SelectorElement<T> = T | string;
 
 export function ensureElement<T extends HTMLElement>(selectorElement: SelectorElement<T>, context?: HTMLElement): T {
+
     if (isSelector(selectorElement)) {
         const elements = ensureAllElements<T>(selectorElement, context);
         if (elements.length > 1) {
@@ -61,6 +62,7 @@ export function ensureElement<T extends HTMLElement>(selectorElement: SelectorEl
         }
         return elements.pop() as T;
     }
+    
     if (selectorElement instanceof HTMLElement) {
         return selectorElement as T;
     }

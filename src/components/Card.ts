@@ -1,11 +1,16 @@
-import {Component} from "./base/Component";
-import {ILot, LotStatus} from "../types";
-import {bem, createElement, ensureElement, formatNumber} from "../utils/utils";
+import { Component } from "./base/Component";
+import { ILot, LotStatus } from "../types";
+import { ILotItem } from "../types";
+import { bem, createElement, ensureElement, formatNumber } from "../utils/utils";
 import clsx from "clsx";
+import { defaultsDeep } from "lodash";
 
 interface ICardActions {
     onClick: (event: MouseEvent) => void;
 }
+
+
+
 
 export interface ICard<T> {
     title: string;
@@ -14,21 +19,29 @@ export interface ICard<T> {
     status: T;
 }
 
+
 export class Card<T> extends Component<ICard<T>> {
     protected _title: HTMLElement;
     protected _image?: HTMLImageElement;
     protected _description?: HTMLElement;
     protected _button?: HTMLButtonElement;
 
+    // принимает какойто блокнаме ???
+    // принимает от родителя какойто container ????
+    // действие необязательное
+
     constructor(protected blockName: string, container: HTMLElement, actions?: ICardActions) {
         super(container);
 
-        this._title = ensureElement<HTMLElement>(`.${blockName}__title`, container);
-        this._image = ensureElement<HTMLImageElement>(`.${blockName}__image`, container);
-        this._button = container.querySelector(`.${blockName}__button`);
-        this._description = container.querySelector(`.${blockName}__description`);
+        // console.log(blockName)
+        //этот класс работает с темплейтом CARD
+        this._title = ensureElement<HTMLElement>(`.${blockName}__title`, container);        //HTML элемент параграф БЛОКнам берется 
 
-        if (actions?.onClick) {
+        this._image = ensureElement<HTMLImageElement>(`.${blockName}__image`, container);       //Картинка
+        this._button = container.querySelector(`.${blockName}__button`);        //Кнопка видимо добавть в корщину ???
+        this._description = container.querySelector(`.${blockName}__description`);      //Описание
+
+        if (actions?.onClick) {     //НАвешивает слушатель при условии ???????????
             if (this._button) {
                 this._button.addEventListener('click', actions.onClick);
             } else {
@@ -37,27 +50,27 @@ export class Card<T> extends Component<ICard<T>> {
         }
     }
 
-    set id(value: string) {
+    set id(value: string) {     //установить ID
         this.container.dataset.id = value;
     }
 
-    get id(): string {
+    get id(): string {      //получить ID
         return this.container.dataset.id || '';
     }
 
-    set title(value: string) {
+    set title(value: string) {      //установить название
         this.setText(this._title, value);
     }
 
-    get title(): string {
+    get title(): string {      //получить название
         return this._title.textContent || '';
     }
 
-    set image(value: string) {
+    set image(value: string) {      //установить изображение
         this.setImage(this._image, value, this.title)
     }
 
-    set description(value: string | string[]) {
+    set description(value: string | string[]) {       //установить описание
         if (Array.isArray(value)) {
             this._description.replaceWith(...value.map(str => {
                 const descTemplate = this._description.cloneNode() as HTMLElement;
@@ -69,6 +82,10 @@ export class Card<T> extends Component<ICard<T>> {
         }
     }
 }
+
+
+//-------------------------
+
 
 export type CatalogItemStatus = {
     status: LotStatus,
@@ -92,6 +109,9 @@ export class CatalogItem extends Card<CatalogItemStatus> {
     }
 }
 
+
+//----------------
+
 export type AuctionStatus = {
     status: string,
     time: string,
@@ -112,6 +132,9 @@ export class AuctionItem extends Card<HTMLElement> {
         this._status.replaceWith(content);
     }
 }
+
+
+//--------------------------
 
 interface IAuctionActions {
     onSubmit: (price: number) => void;
@@ -174,6 +197,9 @@ export class Auction extends Component<AuctionStatus> {
         this._input.focus();
     }
 }
+
+
+//----------------------------
 
 export interface BidStatus {
     amount: number;

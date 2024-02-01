@@ -15,28 +15,35 @@ export class Page extends Component<IPage> {
     protected _basket: HTMLElement;
 
 
+//принимает HTML элемент body и экземпляр Events
+
     constructor(container: HTMLElement, protected events: IEvents) {
         super(container);
 
-        this._counter = ensureElement<HTMLElement>('.header__basket-counter');
-        this._catalog = ensureElement<HTMLElement>('.catalog__items');
-        this._wrapper = ensureElement<HTMLElement>('.page__wrapper');
-        this._basket = ensureElement<HTMLElement>('.header__basket');
+        //Типа это контейнеры куда складывать сформированные карточки и прочую щляпу
+        this._counter = ensureElement<HTMLElement>('.header__basket-counter');      //HTML счетчик корзины
+        
+        //контейнер куда добавлять готовые карточки 
+        this._catalog = ensureElement<HTMLElement>('.catalog__items');      //HTML контейнер куда добавлять готовые карточки
+        this._wrapper = ensureElement<HTMLElement>('.page__wrapper');       //HTML основная страница
+        this._basket = ensureElement<HTMLElement>('.header__basket');       //HTML кнопка корзина
 
-        this._basket.addEventListener('click', () => {
+        this._basket.addEventListener('click', () => {      //Устанавливаем слушатель на клик кнопки корзины
             this.events.emit('bids:open');
         });
     }
 
-    set counter(value: number) {
+    set counter(value: number) {        //Установить значения счетчика в орзине
         this.setText(this._counter, String(value));
     }
 
-    set catalog(items: HTMLElement[]) {
+    //Добавить карточки на старницу
+    set catalog(items: HTMLElement[]) {     //принимает массив html элементов     
+
         this._catalog.replaceChildren(...items);
     }
 
-    set locked(value: boolean) {
+    set locked(value: boolean) {        // ЗАБЛОКИРОВАТЬ СКРОЛ нахер выкинуть 
         if (value) {
             this._wrapper.classList.add('page__wrapper_locked');
         } else {

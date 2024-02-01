@@ -8,6 +8,9 @@ interface IBasketView {
     selected: string[];
 }
 
+// на выходе получаем объект где содержится видимо корзина заказов
+
+
 export class Basket extends Component<IBasketView> {
     protected _list: HTMLElement;
     protected _total: HTMLElement;
@@ -15,6 +18,7 @@ export class Basket extends Component<IBasketView> {
 
     constructor(container: HTMLElement, protected events: EventEmitter) {
         super(container);
+
 
         this._list = ensureElement<HTMLElement>('.basket__list', this.container);
         this._total = this.container.querySelector('.basket__total');

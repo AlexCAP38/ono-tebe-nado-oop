@@ -18,46 +18,57 @@ const events = new EventEmitter();
 const api = new AuctionAPI(CDN_URL, API_URL);
 
 // Чтобы мониторить все события, для отладки
-events.onAll(({ eventName, data }) => {
-    console.log(eventName, data);
-})
+// events.onAll(({ eventName, data }) => {
+//     console.log(eventName, data);
+// })
 
 // Все шаблоны
-const cardCatalogTemplate = ensureElement<HTMLTemplateElement>('#card');
-const cardPreviewTemplate = ensureElement<HTMLTemplateElement>('#preview');
-const auctionTemplate = ensureElement<HTMLTemplateElement>('#auction');
-const cardBasketTemplate = ensureElement<HTMLTemplateElement>('#bid');
-const bidsTemplate = ensureElement<HTMLTemplateElement>('#bids');
-const basketTemplate = ensureElement<HTMLTemplateElement>('#basket');
-const tabsTemplate = ensureElement<HTMLTemplateElement>('#tabs');
-const soldTemplate = ensureElement<HTMLTemplateElement>('#sold');
-const orderTemplate = ensureElement<HTMLTemplateElement>('#order');
-const successTemplate = ensureElement<HTMLTemplateElement>('#success');
+
+const cardCatalogTemplate = ensureElement<HTMLTemplateElement>('#card');        //темплейт
+const cardPreviewTemplate = ensureElement<HTMLTemplateElement>('#preview');     //темплейт
+const auctionTemplate = ensureElement<HTMLTemplateElement>('#auction');     //темплейт
+const cardBasketTemplate = ensureElement<HTMLTemplateElement>('#bid');      //темплейт
+const bidsTemplate = ensureElement<HTMLTemplateElement>('#bids');       //темплейт
+const basketTemplate = ensureElement<HTMLTemplateElement>('#basket');       //темплейт
+const tabsTemplate = ensureElement<HTMLTemplateElement>('#tabs');       //темплейт
+const soldTemplate = ensureElement<HTMLTemplateElement>('#sold');       //темплейт
+const orderTemplate = ensureElement<HTMLTemplateElement>('#order');     //темплейт
+const successTemplate = ensureElement<HTMLTemplateElement>('#success');     //темплейт
+
+
 
 // Модель данных приложения
+// Мне вроде это не нужно, но я еще не понял
 const appData = new AppState({}, events);
 
 // Глобальные контейнеры
 const page = new Page(document.body, events);
+
+// ПОКА НЕ ПОИНМАЮ ЗАЧЕМ ТУТ МОДАЛ НУЖЕН
 const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events);
 
 // Переиспользуемые части интерфейса
-const bids = new Basket(cloneTemplate(bidsTemplate), events);
-const basket = new Basket(cloneTemplate(basketTemplate), events);
-const tabs = new Tabs(cloneTemplate(tabsTemplate), {
-    onClick: (name) => {
-        if (name === 'closed') events.emit('basket:open');
-        else events.emit('bids:open');
-    }
-});
-const order = new Order(cloneTemplate(orderTemplate), events);
+// const bids = new Basket(cloneTemplate(bidsTemplate), events);
+// const basket = new Basket(cloneTemplate(basketTemplate), events);
+// const tabs = new Tabs(cloneTemplate(tabsTemplate), {
+//     onClick: (name) => {
+//         if (name === 'closed') events.emit('basket:open');
+//         else events.emit('bids:open');
+//     }
+// });
+// const order = new Order(cloneTemplate(orderTemplate), events);
 
 // Дальше идет бизнес-логика
 // Поймали событие, сделали что нужно
 
 // Изменились элементы каталога
 events.on<CatalogChangeEvent>('items:changed', () => {
+
+    //берем карточку из appData.catalog сформированных карточек
+    // И БЛЯТЬ  устанавливает их в какойто новый каталог page.catalog
+
     page.catalog = appData.catalog.map(item => {
+        //создаем новый экземпляр 
         const card = new CatalogItem(cloneTemplate(cardCatalogTemplate), {
             onClick: () => events.emit('card:select', item)
         });
@@ -75,123 +86,134 @@ events.on<CatalogChangeEvent>('items:changed', () => {
     page.counter = appData.getClosedLots().length;
 });
 
-// Отправлена форма заказа
-events.on('order:submit', () => {
-    api.orderLots(appData.order)
-        .then((result) => {
-            const success = new Success(cloneTemplate(successTemplate), {
-                onClick: () => {
-                    modal.close();
-                    appData.clearBasket();
-                    events.emit('auction:changed');
-                }
-            });
 
-            modal.render({
-                content: success.render({})
-            });
-        })
-        .catch(err => {
-            console.error(err);
-        });
-});
+
+
+// Отправлена форма заказа
+// events.on('order:submit', () => {
+//     api.orderLots(appData.order)
+//         .then((result) => {
+//             const success = new Success(cloneTemplate(successTemplate), {
+//                 onClick: () => {
+//                     modal.close();
+//                     appData.clearBasket();
+//                     events.emit('auction:changed');
+//                 }
+//             });
+
+//             modal.render({
+//                 content: success.render({})
+//             });
+//         })
+//         .catch(err => {
+//             console.error(err);
+//         });
+// });
 
 // Изменилось состояние валидации формы
-events.on('formErrors:change', (errors: Partial<IOrderForm>) => {
-    const { email, phone } = errors;
-    order.valid = !email && !phone;
-    order.errors = Object.values({phone, email}).filter(i => !!i).join('; ');
-});
+// events.on('formErrors:change', (errors: Partial<IOrderForm>) => {
+//     const { email, phone } = errors;
+//     order.valid = !email && !phone;
+//     order.errors = Object.values({phone, email}).filter(i => !!i).join('; ');
+// });
 
-// Изменилось одно из полей
-events.on(/^order\..*:change/, (data: { field: keyof IOrderForm, value: string }) => {
-    appData.setOrderField(data.field, data.value);
-});
+// // Изменилось одно из полей
+// events.on(/^order\..*:change/, (data: { field: keyof IOrderForm, value: string }) => {
+//     appData.setOrderField(data.field, data.value);
+// });
 
 // Открыть форму заказа
-events.on('order:open', () => {
-    modal.render({
-        content: order.render({
-            phone: '',
-            email: '',
-            valid: false,
-            errors: []
-        })
-    });
-});
+// events.on('order:open', () => {
+//     modal.render({
+//         content: order.render({
+//             phone: '',
+//             email: '',
+//             valid: false,
+//             errors: []
+//         })
+//     });
+// });
 
 // Открыть активные лоты
-events.on('bids:open', () => {
-    modal.render({
-        content: createElement<HTMLElement>('div', {}, [
-            tabs.render({
-                selected: 'active'
-            }),
-            bids.render()
-        ])
-    });
-});
+// events.on('bids:open', () => {
+//     modal.render({
+//         content: createElement<HTMLElement>('div', {}, [
+//             tabs.render({
+//                 selected: 'active'
+//             }),
+//             bids.render()
+//         ])
+//     });
+// });
 
 // Открыть закрытые лоты
-events.on('basket:open', () => {
-    modal.render({
-        content: createElement<HTMLElement>('div', {}, [
-            tabs.render({
-                selected: 'closed'
-            }),
-            basket.render()
-        ])
-    });
-});
+// events.on('basket:open', () => {
+//     modal.render({
+//         content: createElement<HTMLElement>('div', {}, [
+//             tabs.render({
+//                 selected: 'closed'
+//             }),
+//             basket.render()
+//         ])
+//     });
+// });
 
 // Изменения в лоте, но лучше все пересчитать
-events.on('auction:changed', () => {
-    page.counter = appData.getClosedLots().length;
-    bids.items = appData.getActiveLots().map(item => {
-        const card = new BidItem(cloneTemplate(cardBasketTemplate), {
-            onClick: () => events.emit('preview:changed', item)
-        });
-        return card.render({
-            title: item.title,
-            image: item.image,
-            status: {
-                amount: item.price,
-                status: item.isMyBid
-            }
-        });
-    });
-    let total = 0;
-    basket.items = appData.getClosedLots().map(item => {
-        const card = new BidItem(cloneTemplate(soldTemplate), {
-            onClick: (event) => {
-                const checkbox = event.target as HTMLInputElement;
-                appData.toggleOrderedLot(item.id, checkbox.checked);
-                basket.total = appData.getTotal();
-                basket.selected = appData.order.items;
-            }
-        });
-        return card.render({
-            title: item.title,
-            image: item.image,
-            status: {
-                amount: item.price,
-                status: item.isMyBid
-            }
-        });
-    });
-    basket.selected = appData.order.items;
-    basket.total = total;
-})
+// events.on('auction:changed', () => {
+//     page.counter = appData.getClosedLots().length;
+//     bids.items = appData.getActiveLots().map(item => {
+//         const card = new BidItem(cloneTemplate(cardBasketTemplate), {
+//             onClick: () => events.emit('preview:changed', item)
+//         });
+//         return card.render({
+//             title: item.title,
+//             image: item.image,
+//             status: {
+//                 amount: item.price,
+//                 status: item.isMyBid
+//             }
+//         });
+//     });
+//     let total = 0;
+//     basket.items = appData.getClosedLots().map(item => {
+//         const card = new BidItem(cloneTemplate(soldTemplate), {
+//             onClick: (event) => {
+//                 const checkbox = event.target as HTMLInputElement;
+//                 appData.toggleOrderedLot(item.id, checkbox.checked);
+//                 basket.total = appData.getTotal();
+//                 basket.selected = appData.order.items;
+//             }
+//         });
+//         return card.render({
+//             title: item.title,
+//             image: item.image,
+//             status: {
+//                 amount: item.price,
+//                 status: item.isMyBid
+//             }
+//         });
+//     });
+//     basket.selected = appData.order.items;
+//     basket.total = total;
+// })
+
 
 // Открыть лот
+// кликнули по лоту 
 events.on('card:select', (item: LotItem) => {
+
     appData.setPreview(item);
 });
 
+
+// открыли картинку
 // Изменен открытый выбранный лот
+*******************************************************
 events.on('preview:changed', (item: LotItem) => {
+
     const showItem = (item: LotItem) => {
         const card = new AuctionItem(cloneTemplate(cardPreviewTemplate));
+        console.log(card)
         const auction = new Auction(cloneTemplate(auctionTemplate), {
             onSubmit: (price) => {
                 item.placeBid(price);
@@ -242,20 +264,20 @@ events.on('preview:changed', (item: LotItem) => {
 
 
 // Блокируем прокрутку страницы если открыта модалка
-events.on('modal:open', () => {
-    page.locked = true;
-});
+// events.on('modal:open', () => {
+//     page.locked = true;
+// });
 
 // ... и разблокируем
-events.on('modal:close', () => {
-    page.locked = false;
-});
+// events.on('modal:close', () => {
+//     page.locked = false;
+// });
 
 // Получаем лоты с сервера
+// AuctionAP-->API
+
 api.getLotList()
     .then(appData.setCatalog.bind(appData))
     .catch(err => {
         console.error(err);
     });
-
-

@@ -29,6 +29,8 @@ export class EventEmitter implements IEvents {
      * Установить обработчик на событие
      */
     on<T extends object>(eventName: EventName, callback: (event: T) => void) {
+
+
         if (!this._events.has(eventName)) {
             this._events.set(eventName, new Set<Subscriber>());
         }
@@ -61,6 +63,10 @@ export class EventEmitter implements IEvents {
             }
         });
     }
+
+
+
+// по суте мне не нужны ниже методы для проекта
 
     /**
      * Слушать все события

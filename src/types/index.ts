@@ -1,5 +1,7 @@
 export type LotStatus = 'wait' | 'active' | 'closed';
 
+//Этот тип для состояния аукциона 
+
 export interface IAuction {
     status: LotStatus;
     datetime: string;
@@ -8,6 +10,8 @@ export interface IAuction {
     history?: number[];
 }
 
+
+//этот тип для описания карточки
 export interface ILotItem {
     id: string;
     title: string;

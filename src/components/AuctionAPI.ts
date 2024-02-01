@@ -1,5 +1,5 @@
 import { Api, ApiListResponse } from './base/api';
-import {IOrder, IOrderResult, ILot, LotUpdate, IBid} from "../types";
+import { IOrder, IOrderResult, ILot, LotUpdate, IBid } from "../types";
 
 export interface IAuctionAPI {
     getLotList: () => Promise<ILot[]>;
@@ -19,10 +19,12 @@ export class AuctionAPI extends Api implements IAuctionAPI {
 
     getLotItem(id: string): Promise<ILot> {
         return this.get(`/lot/${id}`).then(
-            (item: ILot) => ({
-                ...item,
-                image: this.cdn + item.image,
-            })
+            (item: ILot) => (
+                {
+                    ...item,
+                    image: this.cdn + item.image,
+                }
+            )
         );
     }
 
@@ -32,13 +34,24 @@ export class AuctionAPI extends Api implements IAuctionAPI {
         );
     }
 
+
+    //гет запрос, возвращает промис Тип которого массиво ILOT
+
     getLotList(): Promise<ILot[]> {
-        return this.get('/lot').then((data: ApiListResponse<ILot>) =>
-            data.items.map((item) => ({
-                ...item,
-                image: this.cdn + item.image
-            }))
-        );
+
+        //тут надо поставить product
+        return this.get('/lot')
+        
+        //присваивается тип, какая структура вернется
+        .then((data: ApiListResponse<ILot>) => {
+
+        // console.log(data)
+            //методом перебираем каждый элемент и создаем новый доъбект
+            //изменяя в текущем элементе строчку имадже добавляя туда урл 
+            return data.items.map((item) => ({...item, image: this.cdn + item.image}))
+        }
+            );
+
     }
 
     placeBid(id: string, bid: IBid): Promise<LotUpdate> {
