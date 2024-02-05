@@ -43,7 +43,7 @@ export class Page extends Component<IPage> {
         this._catalog.replaceChildren(...items);
     }
 
-    set locked(value: boolean) {        // ЗАБЛОКИРОВАТЬ СКРОЛ нахер выкинуть 
+    set locked(value: boolean) {        // ЗАБЛОКИРОВАТЬ СКРОЛ 
         if (value) {
             this._wrapper.classList.add('page__wrapper_locked');
         } else {

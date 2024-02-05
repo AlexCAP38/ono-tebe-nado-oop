@@ -1,18 +1,18 @@
 import './scss/styles.scss';
 
-import {AuctionAPI} from "./components/AuctionAPI";
-import {API_URL, CDN_URL} from "./utils/constants";
-import {EventEmitter} from "./components/base/events";
-import {AppState, CatalogChangeEvent, LotItem} from "./components/AppData";
-import {Page} from "./components/Page";
-import {Auction, AuctionItem, BidItem, CatalogItem} from "./components/Card";
-import {cloneTemplate, createElement, ensureElement} from "./utils/utils";
-import {Modal} from "./components/common/Modal";
-import {Basket} from "./components/common/Basket";
-import {Tabs} from "./components/common/Tabs";
-import {IOrderForm} from "./types";
-import {Order} from "./components/Order";
-import {Success} from "./components/common/Success";
+import { AuctionAPI } from "./components/AuctionAPI";
+import { API_URL, CDN_URL } from "./utils/constants";
+import { EventEmitter } from "./components/base/events";
+import { AppState, CatalogChangeEvent, LotItem } from "./components/AppData";
+import { Page } from "./components/Page";
+import { Auction, AuctionItem, BidItem, CatalogItem } from "./components/Card";
+import { cloneTemplate, createElement, ensureElement } from "./utils/utils";
+import { Modal } from "./components/common/Modal";
+import { Basket } from "./components/common/Basket";
+import { Tabs } from "./components/common/Tabs";
+import { IOrderForm } from "./types";
+import { Order } from "./components/Order";
+import { Success } from "./components/common/Success";
 
 const events = new EventEmitter();
 const api = new AuctionAPI(CDN_URL, API_URL);
@@ -23,6 +23,7 @@ const api = new AuctionAPI(CDN_URL, API_URL);
 // })
 
 // Все шаблоны
+
 
 const cardCatalogTemplate = ensureElement<HTMLTemplateElement>('#card');        //темплейт
 const cardPreviewTemplate = ensureElement<HTMLTemplateElement>('#preview');     //темплейт
@@ -35,28 +36,24 @@ const soldTemplate = ensureElement<HTMLTemplateElement>('#sold');       //тем
 const orderTemplate = ensureElement<HTMLTemplateElement>('#order');     //темплейт
 const successTemplate = ensureElement<HTMLTemplateElement>('#success');     //темплейт
 
-
-
-// Модель данных приложения
-// Мне вроде это не нужно, но я еще не понял
 const appData = new AppState({}, events);
 
-// Глобальные контейнеры
 const page = new Page(document.body, events);
 
-// ПОКА НЕ ПОИНМАЮ ЗАЧЕМ ТУТ МОДАЛ НУЖЕН
+
+//в модал рендерим Контент
 const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events);
 
-// Переиспользуемые части интерфейса
-// const bids = new Basket(cloneTemplate(bidsTemplate), events);
-// const basket = new Basket(cloneTemplate(basketTemplate), events);
-// const tabs = new Tabs(cloneTemplate(tabsTemplate), {
-//     onClick: (name) => {
-//         if (name === 'closed') events.emit('basket:open');
-//         else events.emit('bids:open');
-//     }
-// });
-// const order = new Order(cloneTemplate(orderTemplate), events);
+const bids = new Basket(cloneTemplate(bidsTemplate), events);
+const basket = new Basket(cloneTemplate(basketTemplate), events);
+const tabs = new Tabs(cloneTemplate(tabsTemplate), {
+
+    onClick: (name) => {
+        if (name === 'closed') events.emit('basket:open');
+        else events.emit('bids:open');
+    }
+});
+const order = new Order(cloneTemplate(orderTemplate), events);
 
 // Дальше идет бизнес-логика
 // Поймали событие, сделали что нужно
@@ -69,6 +66,7 @@ events.on<CatalogChangeEvent>('items:changed', () => {
 
     page.catalog = appData.catalog.map(item => {
         //создаем новый экземпляр 
+
         const card = new CatalogItem(cloneTemplate(cardCatalogTemplate), {
             onClick: () => events.emit('card:select', item)
         });
@@ -117,7 +115,7 @@ events.on<CatalogChangeEvent>('items:changed', () => {
 //     order.errors = Object.values({phone, email}).filter(i => !!i).join('; ');
 // });
 
-// // Изменилось одно из полей
+// Изменилось одно из полей
 // events.on(/^order\..*:change/, (data: { field: keyof IOrderForm, value: string }) => {
 //     appData.setOrderField(data.field, data.value);
 // });
@@ -135,67 +133,73 @@ events.on<CatalogChangeEvent>('items:changed', () => {
 // });
 
 // Открыть активные лоты
-// events.on('bids:open', () => {
-//     modal.render({
-//         content: createElement<HTMLElement>('div', {}, [
-//             tabs.render({
-//                 selected: 'active'
-//             }),
-//             bids.render()
-//         ])
-//     });
-// });
+events.on('bids:open', () => {
+console.log(1);
 
-// Открыть закрытые лоты
-// events.on('basket:open', () => {
-//     modal.render({
-//         content: createElement<HTMLElement>('div', {}, [
-//             tabs.render({
-//                 selected: 'closed'
-//             }),
-//             basket.render()
-//         ])
-//     });
-// });
+
+    modal.render({
+        content: createElement<HTMLElement>('div', {}, [
+            tabs.render({
+                selected: 'active'
+            }),
+            bids.render()
+        ])
+    });
+});
+
+// Открыть закрытые лоты 
+
+events.on('basket:open', () => {
+    console.log(2),
+    modal.render({
+        content: createElement<HTMLElement>('div', {}, [
+            tabs.render({
+                selected: 'closed'
+            }),
+            basket.render()
+        ])
+    });
+});
 
 // Изменения в лоте, но лучше все пересчитать
-// events.on('auction:changed', () => {
-//     page.counter = appData.getClosedLots().length;
-//     bids.items = appData.getActiveLots().map(item => {
-//         const card = new BidItem(cloneTemplate(cardBasketTemplate), {
-//             onClick: () => events.emit('preview:changed', item)
-//         });
-//         return card.render({
-//             title: item.title,
-//             image: item.image,
-//             status: {
-//                 amount: item.price,
-//                 status: item.isMyBid
-//             }
-//         });
-//     });
-//     let total = 0;
-//     basket.items = appData.getClosedLots().map(item => {
-//         const card = new BidItem(cloneTemplate(soldTemplate), {
-//             onClick: (event) => {
-//                 const checkbox = event.target as HTMLInputElement;
-//                 appData.toggleOrderedLot(item.id, checkbox.checked);
-//                 basket.total = appData.getTotal();
-//                 basket.selected = appData.order.items;
-//             }
-//         });
-//         return card.render({
-//             title: item.title,
-//             image: item.image,
-//             status: {
-//                 amount: item.price,
-//                 status: item.isMyBid
-//             }
-//         });
-//     });
-//     basket.selected = appData.order.items;
-//     basket.total = total;
-// })
+//***********************************************************
+events.on('auction:changed', () => {
+    page.counter = appData.getClosedLots().length;
+    bids.items = appData.getActiveLots().map(item => {
+        const card = new BidItem(cloneTemplate(cardBasketTemplate), {
+            onClick: () => events.emit('preview:changed', item)
+        });
+        return card.render({
+            title: item.title,
+            image: item.image,
+            status: {
+                amount: item.price,
+                status: item.isMyBid
+            }
+        });
+    });
+    let total = 0;
+    basket.items = appData.getClosedLots().map(item => {
+        const card = new BidItem(cloneTemplate(soldTemplate), {
+            onClick: (event) => {
+                const checkbox = event.target as HTMLInputElement;
+                appData.toggleOrderedLot(item.id, checkbox.checked);
+                basket.total = appData.getTotal();
+                basket.selected = appData.order.items;
+            }
+        });
+        return card.render({
+            title: item.title,
+            image: item.image,
+            status: {
+                amount: item.price,
+                status: item.isMyBid
+            }
+        });
+    });
+    basket.selected = appData.order.items;
+    basket.total = total;
+})
 
 
 // Открыть лот
@@ -208,14 +212,18 @@ events.on('card:select', (item: LotItem) => {
 
 // открыли картинку
 // Изменен открытый выбранный лот
-*******************************************************
+//Открытие превью
 events.on('preview:changed', (item: LotItem) => {
 
     const showItem = (item: LotItem) => {
+
         const card = new AuctionItem(cloneTemplate(cardPreviewTemplate));
-        console.log(card)
+
+        //Для установки времени аукциона
         const auction = new Auction(cloneTemplate(auctionTemplate), {
             onSubmit: (price) => {
+
+
                 item.placeBid(price);
                 auction.render({
                     status: item.status,
@@ -226,6 +234,7 @@ events.on('preview:changed', (item: LotItem) => {
                 });
             }
         });
+
 
         modal.render({
             content: card.render({
@@ -260,6 +269,7 @@ events.on('preview:changed', (item: LotItem) => {
     } else {
         modal.close();
     }
+
 });
 
 
@@ -272,6 +282,8 @@ events.on('preview:changed', (item: LotItem) => {
 // events.on('modal:close', () => {
 //     page.locked = false;
 // });
+
+
 
 // Получаем лоты с сервера
 // AuctionAP-->API
