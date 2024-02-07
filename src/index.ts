@@ -134,7 +134,9 @@ events.on<CatalogChangeEvent>('items:changed', () => {
 
 // Открыть активные лоты
 events.on('bids:open', () => {
-console.log(1);
+
+
+    console.log('открылась корзина');
 
 
     modal.render({
@@ -164,6 +166,8 @@ events.on('basket:open', () => {
 // Изменения в лоте, но лучше все пересчитать
 //***********************************************************
 events.on('auction:changed', () => {
+
+
     page.counter = appData.getClosedLots().length;
     bids.items = appData.getActiveLots().map(item => {
         const card = new BidItem(cloneTemplate(cardBasketTemplate), {
@@ -274,14 +278,14 @@ events.on('preview:changed', (item: LotItem) => {
 
 
 // Блокируем прокрутку страницы если открыта модалка
-// events.on('modal:open', () => {
-//     page.locked = true;
-// });
+events.on('modal:open', () => {
+    page.locked = true;
+});
 
 // ... и разблокируем
-// events.on('modal:close', () => {
-//     page.locked = false;
-// });
+events.on('modal:close', () => {
+    page.locked = false;
+});
 
 
 

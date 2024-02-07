@@ -101,6 +101,7 @@ export class AppState extends Model<IAppState> {
     formErrors: FormErrors = {};
 
     toggleOrderedLot(id: string, isIncluded: boolean) {
+
         if (isIncluded) {
             this.order.items = _.uniq([...this.order.items, id]);
         } else {
@@ -109,13 +110,16 @@ export class AppState extends Model<IAppState> {
     }
 
     clearBasket() {
+        console.log('корзина пуста')
         this.order.items.forEach(id => {
             this.toggleOrderedLot(id, false);
             this.catalog.find(it => it.id === id).clearBid();
         });
     }
-
+    
     getTotal() {
+        
+        console.log(this)
         return this.order.items.reduce((a, c) => a + this.catalog.find(it => it.id === c).price, 0)
     }
 
